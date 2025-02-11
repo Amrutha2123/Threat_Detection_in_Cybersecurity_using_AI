@@ -1,1 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Detection - Predict</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #007bff;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="number"], button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="container">
+        <h1>Threat Detection Prediction</h1>
+        <p>Enter the features of the network traffic to check for any threat:</p>
+        
+        <!-- Input Form -->
+        <div class="form-group">
+            <label for="feature1">Feature 1 (e.g., Duration):</label>
+            <input type="number" id="feature1" placeholder="Enter Feature 1" required>
+        </div>
+        <div class="form-group">
+            <label for="feature2">Feature 2 (e.g., Total Fwd Packets):</label>
+            <input type="number" id="feature2" placeholder="Enter Feature 2" required>
+        </div>
+        <div class="form-group">
+            <label for="feature3">Feature 3 (e.g., Destination Port):</label>
+            <input type="number" id="feature3" placeholder="Enter Feature 3" required>
+        </div>
+        
+        <button id="predictBtn">Predict Threat</button>
+
+        <!-- Result Display -->
+        <div class="result" id="result">
+            <h4>Prediction Result:</h4>
+            <p id="predictionResult"></p>
+        </div>
+
+        <div class="error" id="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('#predictBtn').click(function(){
+                // Gather inputs from the form
+                var feature1 = $('#feature1').val();
+                var feature2 = $('#feature2').val();
+                var feature3 = $('#feature3').val();
+                
+                // Check if all inputs are filled
+                if (!feature1 || !feature2 || !feature3) {
+                    $('#error').text('Please fill in all the fields before submitting.').show();
+                    return;
+                }
+                
+                // Clear any previous error
+                $('#error').hide();
+                
+                // Create the data object to send to the backend
+                var data = [{
+                    "feature1": parseFloat(feature1),
+                    "feature2": parseFloat(feature2),
+                    "feature3": parseFloat(feature3)
+                }];
+                
+                // Send data to Flask API for prediction
+                $.ajax({
+                    url: "http://127.0.0.1:5000/predict",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        // Display the prediction result
+                        $('#result').show();
+                        $('#predictionResult').text(response.prediction ? response.prediction : 'No prediction returned.');
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error
+                        $('#error').text('Error occurred while making prediction: ' + error).show();
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
